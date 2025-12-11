@@ -111,10 +111,10 @@ class DualEndGeneticAlgorithmOptimizer:
         
         # 从GUI获取搜索范围
         self.search_range_A = config.get('search_range_A', {
-            'x': (0, 30), 'y': (0, 30), 'z': (0, 30), 'rx': (0.0, 0.03), 'ry': (0.0, 0.03)
+            'x': (0, 30), 'y': (0, 30), 'z': (0, 30), 'rx': (0.0, 0.03), 'ry': (0.0, 0.03), 'rz': (0.0, 0.03)
         })
         self.search_range_B = config.get('search_range_B', {
-            'x': (0, 30), 'y': (0, 30), 'z': (0, 30), 'rx': (0.0, 0.03), 'ry': (0.0, 0.03)
+            'x': (0, 30), 'y': (0, 30), 'z': (0, 30), 'rx': (0.0, 0.03), 'ry': (0.0, 0.03), 'rz': (0.0, 0.03)
         })
         
         # 优化状态
@@ -900,29 +900,34 @@ class DualEndGeneticAlgorithmOptimizer:
     def get_full_position_dict(self, individual_A: np.ndarray, individual_B: np.ndarray) -> Dict:
         """
         根据A、B两端的个体构建完整的位置字典
+        动态处理所有选择的变量，包括rz参数
         """
         position_dict = {}
-        
-        # 构建A端位置
+
+        # 构建A端位置 - 遍历所有选择的变量
         idx_A = 0
-        for var in ['x', 'y', 'z', 'rx', 'ry']:
-            if var in self.selected_variables_A:
-                position_dict[f'A_{var}'] = individual_A[idx_A]
-                idx_A += 1
-            else:
+        for var in self.selected_variables_A:
+            position_dict[f'A_{var}'] = individual_A[idx_A]
+            idx_A += 1
+
+        # 为未选择的A端变量设置默认值
+        for var in ['x', 'y', 'z', 'rx', 'ry', 'rz']:
+            if var not in self.selected_variables_A:
                 lower, upper = self.search_range_A[var]
                 position_dict[f'A_{var}'] = (lower + upper) / 2
-        
-        # 构建B端位置  
+
+        # 构建B端位置 - 遍历所有选择的变量
         idx_B = 0
-        for var in ['x', 'y', 'z', 'rx', 'ry']:
-            if var in self.selected_variables_B:
-                position_dict[f'B_{var}'] = individual_B[idx_B]
-                idx_B += 1
-            else:
+        for var in self.selected_variables_B:
+            position_dict[f'B_{var}'] = individual_B[idx_B]
+            idx_B += 1
+
+        # 为未选择的B端变量设置默认值
+        for var in ['x', 'y', 'z', 'rx', 'ry', 'rz']:
+            if var not in self.selected_variables_B:
                 lower, upper = self.search_range_B[var]
                 position_dict[f'B_{var}'] = (lower + upper) / 2
-                
+
         return position_dict
 
     def initialize_populations(self):
@@ -1498,14 +1503,16 @@ def get_dual_end_config():
             'y': (0, 30),
             'z': (0, 30),
             'rx': (0, 0.03),
-            'ry': (0, 0.03)
+            'ry': (0, 0.03),
+            'rz': (0, 0.03)
         },
         'search_range_B': {
             'x': (0, 30),
             'y': (0, 30),
             'z': (0, 30),
             'rx': (0, 0.03),
-            'ry': (0, 0.03)
+            'ry': (0, 0.03),
+            'rz': (0, 0.03)
         },
         
         # 选择的变量
